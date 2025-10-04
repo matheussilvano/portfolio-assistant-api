@@ -40,8 +40,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos (GET, POST, etc.)
-    allow_headers=["*"],  # Permite todos os cabeçalhos
+    allow_methods=["GET", "POST", "OPTIONS"],  # Adicionado OPTIONS para ser explícito
+    allow_headers=["*"], # Mantido como curinga, pois é geralmente suficiente
 )
 # --- Fim do bloco de correção ---
 
