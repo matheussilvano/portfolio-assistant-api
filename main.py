@@ -34,6 +34,7 @@ origins = [
     "http://127.0.0.1:5500",           # Permite testes locais (se você usar o Live Server do VS Code)
     "http://localhost",
     "http://localhost:8080",
+    "null" # Permite requisições sem origem (útil para ferramentas como Postman)
 ]
 
 app.add_middleware(
