@@ -36,6 +36,7 @@ origins = [
     "http://localhost:8080",
     "null",
     "matheussilvano.dev",
+    "https://www.matheussilvano.dev",
     "https://matheus-silvano.vercel.app/"# Permite requisições sem origem (útil para ferramentas como Postman)
 ]
 
