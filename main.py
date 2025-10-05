@@ -37,7 +37,8 @@ origins = [
     "http://localhost:8080",
     "null",
     "https://www.matheussilvano.dev",
-    "https://matheus-silvano.vercel.app/"
+    "https://matheus-silvano.vercel.app/",
+    "matheussilvano.dev"
 ]
 
 app.add_middleware(
@@ -106,7 +107,7 @@ async def ask_assistant_streaming(request: QuestionRequest):
                         if event.data.delta.content:
                             text_chunk = event.data.delta.content[0].text.value
                             # Limpa anotações em tempo real e envia o pedaço de texto
-                            cleaned_chunk = re.sub(r'【.*?】', '', text_chunk).strip()
+                            cleaned_chunk = re.sub(r'【.*?】', '', text_chunk)
                             if cleaned_chunk:
                                 chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
                                 yield f"data: {json.dumps(chunk_data)}\n\n"
