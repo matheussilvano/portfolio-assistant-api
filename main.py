@@ -91,33 +91,28 @@ async def ask_assistant_streaming(request: QuestionRequest):
         )
 
         async def stream_generator():
-            # Usar 'stream=True' em vez de 'create_and_poll'
             with client.beta.threads.runs.stream(
                 thread_id=thread_id,
                 assistant_id=ASSISTANT_ID,
             ) as stream:
-                # Envia o thread_id como o primeiro evento
                 initial_data = {"event": "thread_id", "data": thread_id}
                 yield f"data: {json.dumps(initial_data)}\n\n"
 
-                # Itera sobre os eventos de streaming
                 for event in stream:
-                    # Verifica se há um delta de texto no evento
                     if event.event == 'thread.message.delta':
                         if event.data.delta.content:
                             text_chunk = event.data.delta.content[0].text.value
-                            # Limpa anotações em tempo real e envia o pedaço de texto
                             cleaned_chunk = re.sub(r'【.*?】', '', text_chunk)
                             if cleaned_chunk:
                                 chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
                                 yield f"data: {json.dumps(chunk_data)}\n\n"
         
-        # Define os cabeçalhos para desativar o buffering do proxy
         headers = {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
+            "Content-Encoding": "identity", # Novo cabeçalho para evitar compressão
         }
         
         return StreamingResponse(stream_generator(), headers=headers)
