@@ -6,8 +6,10 @@ from pydantic import BaseModel, Field
 from openai import OpenAI
 from dotenv import load_dotenv
 
-# --- Nova importação para o CORS ---
+# --- Novas importações para Streaming e CORS ---
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import json
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -27,28 +29,24 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# --- Bloco de configuração do CORS (AQUI ESTÁ A CORREÇÃO) ---
-# Define de quais origens (sites) a API pode receber requisições.
+# --- Bloco de configuração do CORS ---
 origins = [
-    "https://matheussilvano.github.io", # Permite o seu portfólio online
-    "http://127.0.0.1:5500",           # Permite testes locais (se você usar o Live Server do VS Code)
+    "https://matheussilvano.github.io",
+    "http://127.0.0.1:5500",
     "http://localhost",
     "http://localhost:8080",
     "null",
-    "matheussilvano.dev",
     "https://www.matheussilvano.dev",
-    "https://matheus-silvano.vercel.app/"# Permite requisições sem origem (útil para ferramentas como Postman)
+    "https://matheus-silvano.vercel.app/"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],  # Adicionado OPTIONS para ser explícito
-    allow_headers=["*"], # Mantido como curinga, pois é geralmente suficiente
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
 )
-# --- Fim do bloco de correção ---
-
 
 # --- Modelos de Dados (Pydantic) ---
 class QuestionRequest(BaseModel):
@@ -73,12 +71,11 @@ class AnswerResponse(BaseModel):
     )
 
 
-# --- Endpoints da API ---
+# --- Endpoint da API com Streaming ---
 @app.post("/ask",
-          response_model=AnswerResponse,
-          summary="Envia uma pergunta ao assistente",
-          description="Recebe uma pergunta e um ID de conversa opcional. Retorna a resposta do assistente e o ID da conversa para manter o contexto.")
-async def ask_assistant(request: QuestionRequest):
+          summary="Envia uma pergunta ao assistente via streaming",
+          description="Recebe uma pergunta e um ID de conversa opcional. Retorna a resposta do assistente em tempo real (streaming).")
+async def ask_assistant_streaming(request: QuestionRequest):
     thread_id = request.thread_id
     
     try:
@@ -91,28 +88,31 @@ async def ask_assistant(request: QuestionRequest):
             role="user",
             content=request.question
         )
-        
-        run = client.beta.threads.runs.create_and_poll(
-            thread_id=thread_id,
-            assistant_id=ASSISTANT_ID,
-        )
-        
-        if run.status == 'completed':
-            messages = client.beta.threads.messages.list(
+
+        async def stream_generator():
+            # Usar 'stream=True' em vez de 'create_and_poll'
+            with client.beta.threads.runs.stream(
                 thread_id=thread_id,
-                run_id=run.id
-            )
-            assistant_message = messages.data[0].content[0].text.value
-            
-            cleaned_answer = re.sub(r'【.*?】', '', assistant_message).strip()
-            
-            return AnswerResponse(answer=cleaned_answer, thread_id=thread_id)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"O assistente não conseguiu processar a requisição. Status: {run.status}"
-            )
-            
+                assistant_id=ASSISTANT_ID,
+            ) as stream:
+                # Envia o thread_id como o primeiro evento
+                initial_data = {"event": "thread_id", "data": thread_id}
+                yield f"data: {json.dumps(initial_data)}\n\n"
+
+                # Itera sobre os eventos de streaming
+                for event in stream:
+                    # Verifica se há um delta de texto no evento
+                    if event.event == 'thread.message.delta':
+                        if event.data.delta.content:
+                            text_chunk = event.data.delta.content[0].text.value
+                            # Limpa anotações em tempo real e envia o pedaço de texto
+                            cleaned_chunk = re.sub(r'【.*?】', '', text_chunk).strip()
+                            if cleaned_chunk:
+                                chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
+                                yield f"data: {json.dumps(chunk_data)}\n\n"
+        
+        return StreamingResponse(stream_generator(), media_type="text/event-stream")
+
     except Exception as e:
         print(f"Ocorreu um erro inesperado: {e}")
         raise HTTPException(
