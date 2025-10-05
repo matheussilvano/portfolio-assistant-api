@@ -112,7 +112,15 @@ async def ask_assistant_streaming(request: QuestionRequest):
                                 chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
                                 yield f"data: {json.dumps(chunk_data)}\n\n"
         
-        return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        # Define os cabeçalhos para desativar o buffering do proxy
+        headers = {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+        
+        return StreamingResponse(stream_generator(), headers=headers)
 
     except Exception as e:
         print(f"Ocorreu um erro inesperado: {e}")
