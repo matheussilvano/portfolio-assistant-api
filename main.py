@@ -91,13 +91,14 @@ async def ask_assistant_streaming(request: QuestionRequest):
         )
 
         async def stream_generator():
+            # Envia o thread_id primeiro
+            initial_data = {"event": "thread_id", "data": thread_id}
+            yield f"data: {json.dumps(initial_data)}\n\n"
+
             with client.beta.threads.runs.stream(
                 thread_id=thread_id,
                 assistant_id=ASSISTANT_ID,
             ) as stream:
-                initial_data = {"event": "thread_id", "data": thread_id}
-                yield f"data: {json.dumps(initial_data)}\n\n"
-
                 for event in stream:
                     if event.event == 'thread.message.delta':
                         if event.data.delta.content:
@@ -106,13 +107,54 @@ async def ask_assistant_streaming(request: QuestionRequest):
                             if cleaned_chunk:
                                 chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
                                 yield f"data: {json.dumps(chunk_data)}\n\n"
+                    
+                    # --- BLOCO ALTERADO PARA LIDAR COM A CHAMADA DA FERRAMENTA ---
+                    elif event.event == 'thread.run.requires_action':
+                        run_id = event.data.id
+                        tool_calls = event.data.required_action.submit_tool_outputs.tool_calls
+                        tool_outputs = []
+
+                        for tool_call in tool_calls:
+                            if tool_call.function.name == "navigateToSection":
+                                # 1. Envia a instrução para o front-end
+                                print(f"Instruindo o front-end a navegar para: {tool_call.function.arguments}")
+                                tool_data = {
+                                    "event": "tool_call",
+                                    "data": {
+                                        "name": "navigateToSection",
+                                        "arguments": json.loads(tool_call.function.arguments)
+                                    }
+                                }
+                                yield f"data: {json.dumps(tool_data)}\n\n"
+                                
+                                # 2. Adiciona uma "confirmação" para o assistente
+                                tool_outputs.append({
+                                    "tool_call_id": tool_call.id,
+                                    "output": "{\"success\": true, \"message\": \"Ação de navegação enviada ao cliente.\"}"
+                                })
+
+                        # 3. Submete os resultados de volta para o assistente continuar
+                        if tool_outputs:
+                            with client.beta.threads.runs.submit_tool_outputs_stream(
+                                thread_id=thread_id,
+                                run_id=run_id,
+                                tool_outputs=tool_outputs,
+                            ) as stream:
+                                for part in stream: # Continua o streaming dos eventos restantes
+                                     if part.event == 'thread.message.delta':
+                                        if part.data.delta.content:
+                                            text_chunk = part.data.delta.content[0].text.value
+                                            cleaned_chunk = re.sub(r'【.*?】', '', text_chunk)
+                                            if cleaned_chunk:
+                                                chunk_data = {"event": "text_chunk", "data": cleaned_chunk}
+                                                yield f"data: {json.dumps(chunk_data)}\n\n"
         
         headers = {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
-            "Content-Encoding": "identity", # Novo cabeçalho para evitar compressão
+            "Content-Encoding": "identity",
         }
         
         return StreamingResponse(stream_generator(), headers=headers)
