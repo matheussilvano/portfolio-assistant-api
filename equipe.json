@@ -1,0 +1,140 @@
+{
+  "equipe": [
+    {
+      "nome": "Matheus Silvano",
+      "cargo": "Desenvolvedor de IA",
+      "formacao": {
+        "curso": "Sistemas de Informação",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "Inteligência Artificial",
+        "Desenvolvimento Full Stack",
+        "Análise de Dados",
+        "Automação com Python"
+      ],
+      "experiencias": [
+        "Digitro Tecnologia - P&D em IA",
+        "Projetos universitários de automação"
+      ],
+      "participacoes_eventos": [
+        "Techstars Startup Weekend Health Floripa 2025",
+        "Inovar SC 2025",
+        "Databricks Workshop 2025"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - Assistente de RH Inteligente",
+        "iWash - Startup de Lava-Rápido Delivery"
+      ]
+    },
+    {
+      "nome": "Ana Machado",
+      "cargo": "Negócios e Marketing",
+      "formacao": {
+        "curso": "Engenharia de Produção",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "Programação",
+        "Experiência do Usuário (UX)",
+        "Prototipagem no Figma",
+        "Design Thinking"
+      ],
+      "experiencias": [
+        "Projetos de interface para startups universitárias"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - Protótipo de Dashboard"
+      ]
+    },
+    {
+      "nome": "Eduardo",
+      "cargo": "Desenvolvedor Back-end",
+      "formacao": {
+        "curso": "Sistemas de Informação",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "APIs REST",
+        "Node.js",
+        "Banco de Dados SQL",
+        "Docker"
+      ],
+      "experiencias": [
+        "Nexxera - Estágio em Desenvolvimento de Software",
+        "Projetos acadêmicos em sistemas distribuídos"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - API de integração"
+      ]
+    },
+    {
+      "nome": "Matheus Piccoli",
+      "cargo": "Desenvolvedor Back-end",
+      "formacao": {
+        "curso": "Sistemas de Informação",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "Javascript",
+        "Node.js",
+        "Estatística",
+        "Visualização de Dados"
+      ],
+      "experiencias": [
+        "NEDIP - Estágio em Desenvolvimento de Software"
+      ],
+      "participacoes_eventos": [
+        "Semana Acadêmica de Computação 2024"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - Modelo de recomendação de talentos"
+      ]
+    },
+    {
+      "nome": "Felipe Probst",
+      "cargo": "Desenvolvedor Front-end",
+      "formacao": {
+        "curso": "Sistemas de Informação",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "Gestão de Projetos",
+        "Metodologias Ágeis",
+        "Experiência do Usuário (UX)",
+        "Análise de Mercado"
+      ],
+      "experiencias": [
+        "Projetos universitários"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - Modelo de Negócio e Validação"
+      ]
+    },
+    {
+      "nome": "Guilherme Mulatinho",
+      "cargo": "Cientista de Dados",
+      "formacao": {
+        "curso": "Sistemas de Informação",
+        "instituicao": "UFSC",
+        "ano_inicio": 2024
+      },
+      "competencias": [
+        "Automação com Python",
+        "Análise de Dados",
+        "R"
+      ],
+      "experiencias": [
+        "Engenheiro de Dados na Veeries"
+      ],
+      "projetos_apresentados": [
+        "Atlas AI - Interface de Usuário"
+      ]
+    }
+  ]
+}
