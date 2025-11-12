@@ -41,6 +41,7 @@ origins = [
     "https://www.matheussilvano.dev",
     "https://matheus-silvano.vercel.app/",
     "matheussilvano.dev",
+    "https://promoove.vercel.app",
     "null",
 ]
 app.add_middleware(
